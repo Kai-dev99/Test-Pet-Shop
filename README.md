@@ -15,8 +15,6 @@ go generate ./...
 
 # 🐾 Go Pet Shop
 
-hint: If you are sure you want to delete it, run 'git branch -D main'
-hint: Disable this message with "git config set advice.forceDeleteBranch false"
 PS C:\Users\Kamal\go-pet-shop> git branch
 **Go Pet Shop** — это учебный проект интернет-магазина товаров для питомцев, написанный на Go с использованием PostgreSQL.  
 Он создан для отработки навыков работы с SQL-запросами, транзакциями и построения REST API.
