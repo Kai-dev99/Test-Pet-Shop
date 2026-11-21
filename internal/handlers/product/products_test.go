@@ -3,11 +3,13 @@ package product
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"go-pet-shop/internal/models"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"github.com/go-chi/chi"
@@ -17,6 +19,20 @@ func requestWithURLParam(req *http.Request, key, value string) *http.Request {
 	routeContext := chi.NewRouteContext()
 	routeContext.URLParams.Add(key, value)
 	return req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeContext))
+}
+
+func assertJSONBody(t *testing.T, w *httptest.ResponseRecorder, expected string) {
+	t.Helper()
+	var actualBody, expectedBody any
+	if err := json.Unmarshal(w.Body.Bytes(), &actualBody); err != nil {
+		t.Fatalf("response body is not JSON: %v", err)
+	}
+	if err := json.Unmarshal([]byte(expected), &expectedBody); err != nil {
+		t.Fatalf("invalid expected JSON: %v", err)
+	}
+	if !reflect.DeepEqual(actualBody, expectedBody) {
+		t.Errorf("expected body %s, got %s", expected, w.Body.String())
+	}
 }
 
 func TestGetAllProducts_Success(t *testing.T) {
@@ -30,6 +46,7 @@ func TestGetAllProducts_Success(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
 	}
+	assertJSONBody(t, w, `[{"ID":1,"Name":"Dog Food","Price":0,"Stock":0}]`)
 }
 
 func TestGetAllProducts_Error(t *testing.T) {
@@ -43,6 +60,7 @@ func TestGetAllProducts_Error(t *testing.T) {
 	if w.Code != http.StatusInternalServerError {
 		t.Fatalf("expected status %d, got %d", http.StatusInternalServerError, w.Code)
 	}
+	assertJSONBody(t, w, `{"error":"Internal server error","message":"Failed to retrieve products"}`)
 }
 
 func TestCreateProduct_Success(t *testing.T) {
@@ -61,6 +79,7 @@ func TestCreateProduct_Success(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
 	}
+	assertJSONBody(t, w, `{"status":"Product created successfully","id":1,"product":{"ID":1,"Name":"Dog Food","Price":12.5,"Stock":10}}`)
 }
 
 func TestCreateProduct_BadRequest(t *testing.T) {
@@ -72,6 +91,7 @@ func TestCreateProduct_BadRequest(t *testing.T) {
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, w.Code)
 	}
+	assertJSONBody(t, w, `{"error":"Bad request","message":"Invalid JSON payload"}`)
 }
 
 func TestCreateProduct_Fail(t *testing.T) {
@@ -86,6 +106,7 @@ func TestCreateProduct_Fail(t *testing.T) {
 	if w.Code != http.StatusInternalServerError {
 		t.Fatalf("expected status %d, got %d", http.StatusInternalServerError, w.Code)
 	}
+	assertJSONBody(t, w, `{"error":"Internal server error","message":"Failed to create product"}`)
 }
 
 func TestUpdateProduct_Success(t *testing.T) {
@@ -105,6 +126,7 @@ func TestUpdateProduct_Success(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
 	}
+	assertJSONBody(t, w, `{"status":"Product updated successfully","id":7,"product":{"ID":7,"Name":"Dog Food","Price":12.5,"Stock":10}}`)
 }
 
 func TestUpdateProduct_BadRequest(t *testing.T) {
@@ -117,6 +139,7 @@ func TestUpdateProduct_BadRequest(t *testing.T) {
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, w.Code)
 	}
+	assertJSONBody(t, w, `{"error":"Bad request","message":"Invalid JSON payload"}`)
 }
 
 func TestUpdateProduct_Fail(t *testing.T) {
@@ -132,6 +155,7 @@ func TestUpdateProduct_Fail(t *testing.T) {
 	if w.Code != http.StatusInternalServerError {
 		t.Fatalf("expected status %d, got %d", http.StatusInternalServerError, w.Code)
 	}
+	assertJSONBody(t, w, `{"error":"Internal server error","message":"Failed to update product"}`)
 }
 
 func TestDeleteProduct_Success(t *testing.T) {
@@ -149,6 +173,7 @@ func TestDeleteProduct_Success(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
 	}
+	assertJSONBody(t, w, `{"status":"Product deleted successfully","id":7,"message":"Product with ID 7 has been deleted"}`)
 }
 
 func TestDeleteProduct_BadRequest(t *testing.T) {
@@ -159,6 +184,7 @@ func TestDeleteProduct_BadRequest(t *testing.T) {
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("expected status %d, got %d", http.StatusBadRequest, w.Code)
 	}
+	assertJSONBody(t, w, `{"error":"Bad request","message":"Product ID is required"}`)
 }
 
 func TestDeleteProduct_Fail(t *testing.T) {
@@ -173,4 +199,5 @@ func TestDeleteProduct_Fail(t *testing.T) {
 	if w.Code != http.StatusInternalServerError {
 		t.Fatalf("expected status %d, got %d", http.StatusInternalServerError, w.Code)
 	}
+	assertJSONBody(t, w, `{"error":"Internal server error","message":"Failed to delete product"}`)
 }
