@@ -14,8 +14,6 @@ go test ./...
 go generate ./...
 
 # 🐾 Go Pet Shop
-
-PS C:\Users\Kamal\go-pet-shop> git branch
 **Go Pet Shop** — это учебный проект интернет-магазина товаров для питомцев, написанный на Go с использованием PostgreSQL.  
 Он создан для отработки навыков работы с SQL-запросами, транзакциями и построения REST API.
 
