@@ -5,12 +5,33 @@
 - `tests-manual` использует ручной мок `ProductsMock` из `product_mock.go`.
 - `tests-mockery` использует мок, сгенерированный mockery, из `internal/handlers/product/mocks/Products.go`.
 
-Чтобы проверить домашнюю работу, клонируй репозиторий и перейди в его каталог:
+Необходимо клонировать репозиторий и перейди в его каталог:
 
 ```sh
 git clone https://github.com/Kai-dev99/Test-Pet-Shop.git
 cd Test-Pet-Shop
 ```
+
+
+## 🛠 Как запустить
+
+1. Перейти в каталог проекта, клонированного по инструкции выше.
+
+2. Настроить окружение: скопировать `.env.example` в `.env` и поправить логин, пароль и имя базы.
+`cp .env.example .env`
+
+3. Поднять PostgreSQL и применить миграции:
+`docker compose up -d postgres`
+`task migrate`
+
+4. Запустить сервер (конфиг `config/local.yaml`, другой выбирается через `APP_ENV`):
+`go run ./cmd/app`
+
+5. После этого API будет доступно по адресу:
+`http://localhost:8080`, проверка — `GET /health`.
+
+Всё сразу в контейнерах: `docker compose up -d --build` (приложение берёт `config/dev.yaml`).
+
 
 Запусти тесты сначала с ручным моком, затем со сгенерированным. Для этих тестов достаточно Go.
 
@@ -21,6 +42,7 @@ git switch tests-mockery
 go test ./...
 ```
 
+
 В ветке `tests-mockery` после изменения интерфейса `Products` перегенерируй мок:
 
 ```sh
@@ -28,6 +50,7 @@ go generate ./...
 ```
 
 # 🐾 Go Pet Shop
+
 **Go Pet Shop** — это учебный проект интернет-магазина товаров для питомцев, написанный на Go с использованием PostgreSQL.  
 Он создан для отработки навыков работы с SQL-запросами, транзакциями и построения REST API.
 
@@ -75,25 +98,3 @@ go-pet-shop/
 ├── go.mod # Модуль Go
 └── README.md # Документация
 ```
-
----
-
-## 🛠 Как запустить
-
-1. Перейти в каталог проекта, клонированного по инструкции выше.
-
-2. Настроить окружение: скопировать `.env.example` в `.env` и поправить логин, пароль и имя базы.
-`cp .env.example .env`
-
-3. Поднять PostgreSQL и применить миграции:
-`docker compose up -d postgres`
-`task migrate`
-
-4. Запустить сервер (конфиг `config/local.yaml`, другой выбирается через `APP_ENV`):
-`go run ./cmd/app`
-
-5. После этого API будет доступно по адресу:
-`http://localhost:8080`, проверка — `GET /health`.
-
-Всё сразу в контейнерах: `docker compose up -d --build` (приложение берёт `config/dev.yaml`).
-
